@@ -1,0 +1,111 @@
+.contact-form-section {
+  padding: 60px 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+  color: var(--text-color);
+}
+
+.contact-form-section h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2.5em;
+  color: var(--heading-color);
+  margin-bottom: 40px;
+  text-shadow: 0 0 15px var(--heading-shadow-color); /* Enhanced glow */
+}
+
+.contact-form {
+  background: linear-gradient(145deg, var(--card-bg-start), var(--card-bg-end));
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px var(--shadow-color); /* Enhanced shadow */
+  border: 1px solid var(--card-border);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 1.1em;
+  color: var(--subheading-color);
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-size: 1em;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--brand-color);
+  box-shadow: 0 0 10px var(--brand-color); /* Enhanced focus glow */
+  outline: none;
+}
+
+.submit-button {
+  display: inline-block;
+  padding: 15px 30px;
+  background: linear-gradient(45deg, #00c6ff, #0072ff);
+  color: white;
+  font-size: 1.4em;
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: 8px;
+  box-shadow: 0 5px 20px var(--button-glow); /* Enhanced glow */
+  transition: all 0.3s ease;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.submit-button:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 30px var(--button-glow); /* More intense glow on hover */
+  background: linear-gradient(45deg, #0072ff, #00c6ff);
+}
+
+.form-status {
+  margin-top: 20px;
+  font-size: 1.1em;
+  color: var(--brand-color);
+  text-shadow: 0 0 5px var(--brand-color); /* Status message glow */
+}
+
+@media (max-width: 768px) {
+  .contact-form-section h2 {
+    font-size: 2em;
+  }
+
+  .contact-form {
+    padding: 20px;
+  }
+
+  .form-group label {
+    font-size: 1em;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 10px;
+  }
+
+  .submit-button {
+    font-size: 1.2em;
+    padding: 12px 25px;
+  }
+}

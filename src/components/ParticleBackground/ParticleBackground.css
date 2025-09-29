@@ -1,0 +1,104 @@
+.particle-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -3; /* Below animated grid and video background */
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  background-color: rgba(0, 198, 255, 0.5); /* Techy blue glow */
+  border-radius: 50%;
+  opacity: 0;
+  animation: particle-animation linear infinite;
+}
+
+/* Define different sizes and animation delays for variety */
+.particle:nth-child(1) { width: 3px; height: 3px; animation-duration: 15s; animation-delay: 0s; }
+.particle:nth-child(2) { width: 4px; height: 4px; animation-duration: 18s; animation-delay: 1s; }
+.particle:nth-child(3) { width: 2px; height: 2px; animation-duration: 12s; animation-delay: 2s; }
+.particle:nth-child(4) { width: 5px; height: 5px; animation-duration: 20s; animation-delay: 3s; }
+.particle:nth-child(5) { width: 3px; height: 3px; animation-duration: 16s; animation-delay: 4s; }
+.particle:nth-child(6) { width: 4px; height: 4px; animation-duration: 19s; animation-delay: 5s; }
+.particle:nth-child(7) { width: 2px; height: 2px; animation-duration: 13s; animation-delay: 6s; }
+.particle:nth-child(8) { width: 5px; height: 5px; animation-duration: 21s; animation-delay: 7s; }
+.particle:nth-child(9) { width: 3px; height: 3px; animation-duration: 17s; animation-delay: 8s; }
+.particle:nth-child(10) { width: 4px; height: 4px; animation-duration: 14s; animation-delay: 9s; }
+/* ... and so on for all 50 particles, or use a loop in preprocessor */
+/* For simplicity, I'll just add a few more examples */
+.particle:nth-child(11) { width: 3px; height: 3px; animation-duration: 15s; animation-delay: 10s; }
+.particle:nth-child(12) { width: 4px; height: 4px; animation-duration: 18s; animation-delay: 11s; }
+.particle:nth-child(13) { width: 2px; height: 2px; animation-duration: 12s; animation-delay: 12s; }
+.particle:nth-child(14) { width: 5px; height: 5px; animation-duration: 20s; animation-delay: 13s; }
+.particle:nth-child(15) { width: 3px; height: 3px; animation-duration: 16s; animation-delay: 14s; }
+.particle:nth-child(16) { width: 4px; height: 4px; animation-duration: 19s; animation-delay: 15s; }
+.particle:nth-child(17) { width: 2px; height: 2px; animation-duration: 13s; animation-delay: 16s; }
+.particle:nth-child(18) { width: 5px; height: 5px; animation-duration: 21s; animation-delay: 17s; }
+.particle:nth-child(19) { width: 3px; height: 3px; animation-duration: 17s; animation-delay: 18s; }
+.particle:nth-child(20) { width: 4px; height: 4px; animation-duration: 14s; animation-delay: 19s; }
+.particle:nth-child(21) { width: 3px; height: 3px; animation-duration: 15s; animation-delay: 20s; }
+.particle:nth-child(22) { width: 4px; height: 4px; animation-duration: 18s; animation-delay: 21s; }
+.particle:nth-child(23) { width: 2px; height: 2px; animation-duration: 12s; animation-delay: 22s; }
+.particle:nth-child(24) { width: 5px; height: 5px; animation-duration: 20s; animation-delay: 23s; }
+.particle:nth-child(25) { width: 3px; height: 3px; animation-duration: 16s; animation-delay: 24s; }
+.particle:nth-child(26) { width: 4px; height: 4px; animation-duration: 19s; animation-delay: 25s; }
+.particle:nth-child(27) { width: 2px; height: 2px; animation-duration: 13s; animation-delay: 26s; }
+.particle:nth-child(28) { width: 5px; height: 5px; animation-duration: 21s; animation-delay: 27s; }
+.particle:nth-child(29) { width: 3px; height: 3px; animation-duration: 17s; animation-delay: 28s; }
+.particle:nth-child(30) { width: 4px; height: 4px; animation-duration: 14s; animation-delay: 29s; }
+.particle:nth-child(31) { width: 3px; height: 3px; animation-duration: 15s; animation-delay: 30s; }
+.particle:nth-child(32) { width: 4px; height: 4px; animation-duration: 18s; animation-delay: 31s; }
+.particle:nth-child(33) { width: 2px; height: 2px; animation-duration: 12s; animation-delay: 32s; }
+.particle:nth-child(34) { width: 5px; height: 5px; animation-duration: 20s; animation-delay: 33s; }
+.particle:nth-child(35) { width: 3px; height: 3px; animation-duration: 16s; animation-delay: 34s; }
+.particle:nth-child(36) { width: 4px; height: 4px; animation-duration: 19s; animation-delay: 35s; }
+.particle:nth-child(37) { width: 2px; height: 2px; animation-duration: 13s; animation-delay: 36s; }
+.particle:nth-child(38) { width: 5px; height: 5px; animation-duration: 21s; animation-delay: 37s; }
+.particle:nth-child(39) { width: 3px; height: 3px; animation-duration: 17s; animation-delay: 38s; }
+.particle:nth-child(40) { width: 4px; height: 4px; animation-duration: 14s; animation-delay: 39s; }
+.particle:nth-child(41) { width: 3px; height: 3px; animation-duration: 15s; animation-delay: 40s; }
+.particle:nth-child(42) { width: 4px; height: 4px; animation-duration: 18s; animation-delay: 41s; }
+.particle:nth-child(43) { width: 2px; height: 2px; animation-duration: 12s; animation-delay: 42s; }
+.particle:nth-child(44) { width: 5px; height: 5px; animation-duration: 20s; animation-delay: 43s; }
+.particle:nth-child(45) { width: 3px; height: 3px; animation-duration: 16s; animation-delay: 44s; }
+.particle:nth-child(46) { width: 4px; height: 4px; animation-duration: 19s; animation-delay: 45s; }
+.particle:nth-child(47) { width: 2px; height: 2px; animation-duration: 13s; animation-delay: 46s; }
+.particle:nth-child(48) { width: 5px; height: 5px; animation-duration: 21s; animation-delay: 47s; }
+.particle:nth-child(49) { width: 3px; height: 3px; animation-duration: 17s; animation-delay: 48s; }
+.particle:nth-child(50) { width: 4px; height: 4px; animation-duration: 14s; animation-delay: 49s; }
+
+@keyframes particle-animation {
+  0% {
+    transform: translate(var(--x-start), var(--y-start)) scale(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0;
+  }
+  100% {
+    transform: translate(var(--x-end), var(--y-end)) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Randomize start/end positions for particles */
+.particle:nth-child(odd) {
+  --x-start: -10vw;
+  --y-start: 100vh;
+  --x-end: 110vw;
+  --y-end: -10vh;
+}
+
+.particle:nth-child(even) {
+  --x-start: 110vw;
+  --y-start: -10vh;
+  --x-end: -10vw;
+  --y-end: 100vh;
+}
