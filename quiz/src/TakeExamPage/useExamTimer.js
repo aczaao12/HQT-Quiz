@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
-export const useExamTimer = (initialTime, examLoading, submitting, handleSubmitExam) => {
+export const useExamTimer = (initialTime, examLoading, submitting) => {
     const [timeLeft, setTimeLeft] = useState(initialTime);
     const timerRef = useRef(null);
 
@@ -16,12 +16,11 @@ export const useExamTimer = (initialTime, examLoading, submitting, handleSubmitE
             timerRef.current = setTimeout(() => {
                 setTimeLeft(prevTime => prevTime - 1);
             }, 1000);
-        } else if (timeLeft === 0 && !examLoading && !submitting) {
-            // Only auto-submit if exam data is loaded and not already submitting
-            handleSubmitExam(true); // Automatically submit when time runs out
         }
+        // Auto-submit logic moved to parent to avoid circular dependency
+
         return () => clearTimeout(timerRef.current);
-    }, [timeLeft, examLoading, submitting, handleSubmitExam]);
+    }, [timeLeft, examLoading, submitting]);
 
     return { timeLeft, setTimeLeft, timerRef };
 };
