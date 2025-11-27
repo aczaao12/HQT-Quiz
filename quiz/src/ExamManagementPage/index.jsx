@@ -1,164 +1,172 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Button, Form, Card, Row, Col, Alert } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import { db } from '../../firebase';
-import { collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
-import { useNavigate, Link } from 'react-router-dom';
+import { useExamManagement } from './useExamManagement';
 
-const ExamManagementPage = () => {
-  const { user, userData, loading } = useUser();
-  // const navigate = useNavigate(); // No longer needed for this navigation
+const ExamCard = ({ exam }) => {
+  const createdAt = exam.created_at?.toDate ? new Date(exam.created_at.toDate()) : null;
 
+  const getStatusBadge = (status) => {
+    const statusColors = {
+      draft: 'bg-yellow-300 text-green-800',
+      published: 'bg-green-300 text-green-900',
+      archived: 'bg-red-300 text-red-900',
+    };
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-semibold uppercase ${statusColors[status] || 'bg-yellow-300 text-green-800'}`}>
+        {status}
+      </span>
+    );
+  };
+
+  return (
+    <div className="bg-[#1e3a1e]/90 rounded-2xl p-6 shadow-lg flex flex-col gap-3">
+      <div className="flex justify-between items-center">
+        <h4 className="text-yellow-400 font-bold">{exam.title}</h4>
+        {getStatusBadge(exam.status)}
+      </div>
+      <div className="flex flex-wrap gap-2 text-sm text-green-200">
+        <div>⏱️ {exam.duration} minutes</div>
+        <div>⭐ {exam.total_points} points</div>
+        <div>📅 {createdAt ? createdAt.toLocaleDateString() : 'N/A'}</div>
+      </div>
+      <div className="flex gap-2 mt-2">
+        <Link to={`/exams/${exam.id}/questions`} className="px-2 py-1 bg-green-700 text-yellow-400 rounded text-xs hover:bg-green-600">Questions</Link>
+        <Link to={`/exams/${exam.id}/assign`} className="px-2 py-1 bg-green-700 text-yellow-400 rounded text-xs hover:bg-green-600">Assign</Link>
+        <Link to={`/exams/${exam.id}/preview`} className="px-2 py-1 bg-green-700 text-yellow-400 rounded text-xs hover:bg-green-600">Preview</Link>
+        <Link to={`/exams/${exam.id}/assign`} className="px-2 py-1 bg-green-700 text-yellow-400 rounded text-xs hover:bg-green-600">Generate Share Link</Link>
+      </div>
+    </div>
+  );
+};
+
+const CreateExamForm = ({ onCreate, loading }) => {
   const [examTitle, setExamTitle] = useState('');
   const [examDuration, setExamDuration] = useState('');
   const [totalPoints, setTotalPoints] = useState('');
-  const [myCreatedExams, setMyCreatedExams] = useState([]); // Renamed state
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
-  const [actionLoading, setActionLoading] = useState(false);
 
-  useEffect(() => {
-    if (user) { // Fetch exams if user is authenticated
-      fetchMyCreatedExams();
-    }
-  }, [user]); // Re-fetch when user changes
-
-  const fetchMyCreatedExams = async () => { // Renamed function
-    if (!user) return; // Only check for authentication
-    try {
-      const q = query(collection(db, 'exams'), where('teacher_id', '==', user.uid));
-      const querySnapshot = await getDocs(q);
-      const exams = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setMyCreatedExams(exams);
-    } catch (err) {
-      setError('Failed to fetch exams: ' + err.message);
-      console.error(err);
-    }
-  };
-
-  const handleCreateExam = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (!user) { // Only check for authentication
-      setError('You must be logged in to create exams.');
-      return;
-    }
-    if (!examTitle.trim() || !examDuration || !totalPoints) {
-      setError('Please fill all fields.');
-      return;
-    }
-
-    setActionLoading(true);
     setError(null);
-    setSuccess(null);
-
-    try {
-      const newExamRef = await addDoc(collection(db, 'exams'), {
-        title: examTitle,
-        teacher_id: user.uid,
-        duration: Number(examDuration),
-        total_points: Number(totalPoints),
-        status: 'draft', // Default status
-        created_at: serverTimestamp(),
-      });
-      setSuccess(`Exam "${examTitle}" created successfully. ID: ${newExamRef.id}`);
-      setExamTitle('');
-      setExamDuration('');
-      setTotalPoints('');
-      fetchMyCreatedExams(); // Refresh list
-    } catch (err) {
-      setError('Failed to create exam: ' + err.message);
-      console.error(err);
-    } finally {
-      setActionLoading(false);
-    }
+    onCreate({ examTitle, examDuration, totalPoints });
+    setExamTitle('');
+    setExamDuration('');
+    setTotalPoints('');
   };
-
-  if (loading) {
-    return <Container className="text-center mt-5"><p>Loading...</p></Container>;
-  }
-
-  if (!user) { // Only check for authentication
-    return <Container className="text-center mt-5"><p>Please log in to view this page.</p></Container>;
-  }
 
   return (
-    <Container className="mt-5">
-      <h2 className="text-center mb-4">Exam Management</h2>
+    <div className="bg-[#f0fdf4] p-6 rounded-2xl shadow-lg flex flex-col gap-6 w-full max-w-lg">
+      <h3 className="text-2xl font-bold text-yellow-400">Create New Exam</h3>
+      {error && <div className="text-red-600">{error}</div>}
 
-      <Card className="mb-4 shadow">
-        <Card.Body>
-          <h4 className="mb-3">Create New Exam</h4>
-          {error && <Alert variant="danger">{error}</Alert>}
-          {success && <Alert variant="success">{success}</Alert>}
-          <Form onSubmit={handleCreateExam}>
-            <Form.Group className="mb-3" controlId="formExamTitle">
-              <Form.Label>Exam Title</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter exam title"
-                value={examTitle}
-                onChange={(e) => setExamTitle(e.target.value)}
-                disabled={actionLoading}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="formExamDuration">
-              <Form.Label>Duration (minutes)</Form.Label>
-              <Form.Control
-                type="number"
-                placeholder="e.g., 60"
-                value={examDuration}
-                onChange={(e) => setExamDuration(e.target.value)}
-                disabled={actionLoading}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="formTotalPoints">
-              <Form.Label>Total Points</Form.Label>
-              <Form.Control
-                type="number"
-                placeholder="e.g., 100"
-                value={totalPoints}
-                onChange={(e) => setTotalPoints(e.target.value)}
-                disabled={actionLoading}
-                required
-              />
-            </Form.Group>
-            <Button variant="primary" type="submit" disabled={actionLoading}>
-              {actionLoading ? 'Creating...' : 'Create Exam'}
-            </Button>
-          </Form>
-        </Card.Body>
-      </Card>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <label className="flex flex-col">
+          <span className="text-yellow-400 font-semibold">📝 Exam Title</span>
+          <input
+            type="text"
+            placeholder="Enter exam title"
+            value={examTitle}
+            onChange={(e) => setExamTitle(e.target.value)}
+            disabled={loading}
+            className="mt-1 p-2 rounded-lg border border-green-800 focus:ring-2 focus:ring-green-700 bg-white text-black"
+            required
+          />
+        </label>
 
-      <h4 className="mb-3">My Created Exams</h4>
-      {myCreatedExams.length === 0 ? (
-        <Alert variant="info">You haven't created any exams yet.</Alert>
-      ) : (
-        <Row xs={1} md={2} lg={3} className="g-4">
-          {myCreatedExams.map((exam) => (
-            <Col key={exam.id}>
-              <Card className="h-100 shadow-sm">
-                <Card.Body>
-                  <Card.Title>{exam.title}</Card.Title>
-                  <Card.Text>
-                    <strong>ID:</strong> {exam.id}<br/>
-                    <strong>Duration:</strong> {exam.duration} minutes<br/>
-                    <strong>Total Points:</strong> {exam.total_points}<br/>
-                    <strong>Status:</strong> {exam.status}<br/>
-                    <strong>Created:</strong> {new Date(exam.created_at.toDate()).toLocaleDateString()}
-                  </Card.Text>
-                  <Link to={`/exams/${exam.id}/questions`} className="btn btn-info btn-sm me-2">Add Questions</Link>
-                  <Link to={`/exams/${exam.id}/assign`} className="btn btn-success btn-sm me-2">Assign</Link>
-                  <Link to={`/exams/${exam.id}/preview`} className="btn btn-secondary btn-sm me-2">Preview</Link>
-                  <Button variant="secondary" size="sm">Edit</Button>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      )}
-    </Container>
+        <label className="flex flex-col">
+          <span className="text-yellow-400 font-semibold">⏱️ Duration (minutes)</span>
+          <input
+            type="number"
+            placeholder="e.g., 60"
+            value={examDuration}
+            onChange={(e) => setExamDuration(e.target.value)}
+            disabled={loading}
+            className="mt-1 p-2 rounded-lg border border-green-800 focus:ring-2 focus:ring-green-700 bg-white text-black"
+            required
+          />
+        </label>
+
+        <label className="flex flex-col">
+          <span className="text-yellow-400 font-semibold">⭐ Total Points</span>
+          <input
+            type="number"
+            placeholder="e.g., 100"
+            value={totalPoints}
+            onChange={(e) => setTotalPoints(e.target.value)}
+            disabled={loading}
+            className="mt-1 p-2 rounded-lg border border-green-800 focus:ring-2 focus:ring-green-700 bg-white text-black"
+            required
+          />
+        </label>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="mt-4 w-full bg-gradient-to-r from-green-800 to-green-600 text-yellow-400 font-semibold py-2 rounded-lg hover:shadow-lg transition"
+        >
+          {loading ? '⏳ Creating Exam...' : '🚀 Create Exam'}
+        </button>
+      </form>
+    </div>
+  );
+};
+
+const ExamManagementPage = () => {
+  const { user, loading } = useUser();
+  const { myCreatedExams, actionLoading, success, error, handleCreateExam } = useExamManagement(user);
+
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-green-800"></div>
+      <p className="mt-2">Loading...</p>
+    </div>
+  );
+
+  if (!user) return (
+    <div className="flex flex-col items-center justify-center h-screen">
+      <h3 className="text-xl font-bold">🔐 Authentication Required</h3>
+      <p>Please log in to view this page.</p>
+    </div>
+  );
+
+  return (
+    <div className="p-6 bg-gradient-to-br from-[#f5f7fa] to-[#c3cfe2] min-h-screen">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-extrabold bg-gradient-to-r from-[#667eea] to-[#764ba2] text-transparent bg-clip-text">Exam Management</h1>
+        <p className="text-gray-700 mt-2">Create and manage your exams with ease</p>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-6">
+        <CreateExamForm onCreate={handleCreateExam} loading={actionLoading} />
+
+        <div className="flex-1 flex flex-col gap-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-2xl font-bold text-gray-800">My Created Exams</h3>
+            <span className="px-3 py-1 bg-gradient-to-r from-pink-400 to-red-500 text-white rounded-full text-sm font-semibold">
+              {myCreatedExams.length} exams
+            </span>
+          </div>
+
+          {success && <div className="text-green-600">{success}</div>}
+          {error && <div className="text-red-600">{error}</div>}
+
+          {myCreatedExams.length === 0 ? (
+            <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
+              <div className="text-4xl mb-2">📚</div>
+              <h4 className="font-bold mb-1">No Exams Yet</h4>
+              <p>Create your first exam to get started!</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4 overflow-y-auto max-h-[70vh] pr-2">
+              {myCreatedExams.map(exam => (
+                <ExamCard key={exam.id} exam={exam} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

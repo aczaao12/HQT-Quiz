@@ -1,0 +1,143 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserData(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data;
+    }
+
+    function isClassCreator(classId) {
+      return isAuthenticated() &&
+        get(/databases/$(database)/documents/classes/$(classId)).data.teacher_id == request.auth.uid;
+    }
+
+    function isExamCreator(examId) {
+      return isAuthenticated() &&
+        get(/databases/$(database)/documents/exams/$(examId)).data.teacher_id == request.auth.uid;
+    }
+
+    // USERS
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasAll([
+          'name', 'email', 'role', 'organization_id', 'created_at'
+        ]);
+      allow update: if isOwner(userId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name']);
+      allow delete: if false;
+    }
+
+    // CLASSES
+    match /classes/{classId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.teacher_id ||
+        exists(/databases/$(database)/documents/classes/$(classId)/students/$(request.auth.uid))
+      );
+
+      allow create: if isAuthenticated()
+        && request.resource.data.keys().hasAll([
+          'name', 'teacher_id', 'organization_id', 'join_code', 'created_at'
+        ])
+        && request.resource.data.teacher_id == request.auth.uid;
+
+      allow update: if isClassCreator(classId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasAny(['name', 'join_code']);
+
+      allow delete: if isClassCreator(classId);
+
+      match /students/{studentId} {
+        allow read: if isClassCreator(classId) || isOwner(studentId);
+        allow create: if isAuthenticated()
+          && isOwner(studentId)
+          && request.resource.data.keys().hasAll(['joined_at']);
+        allow update: if false;
+        allow delete: if isClassCreator(classId) || isOwner(studentId);
+      }
+    }
+
+    // EXAMS
+    match /exams/{examId} {
+      allow read: if isExamCreator(examId) || isAuthenticated();
+
+      allow create: if isAuthenticated()
+        && request.resource.data.keys().hasAll([
+          'title', 'teacher_id', 'duration', 'total_points', 'status', 'created_at'
+        ])
+        && request.resource.data.teacher_id == request.auth.uid
+        && request.resource.data.status == 'draft';
+
+      allow update: if isExamCreator(examId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'title', 'duration', 'total_points', 'status'
+        ])
+        && request.resource.data.status in ['draft', 'published', 'archived'];
+
+      allow delete: if isExamCreator(examId);
+
+      match /questions/{questionId} {
+        allow read: if isExamCreator(examId) || isAuthenticated();
+
+        allow create: if isExamCreator(examId)
+          && request.resource.data.keys().hasAll(['text', 'type', 'points', 'created_at'])
+          && request.resource.data.type in ['multiple_choice', 'essay', 'fill_in'];
+
+        allow update: if isExamCreator(examId);
+        allow delete: if isExamCreator(examId);
+      }
+    }
+
+    // ASSIGNMENTS
+    match /assignments/{assignmentId} {
+      allow read: if isClassCreator(resource.data.class_id)
+        || isExamCreator(resource.data.exam_id)
+        || (isAuthenticated() &&
+            exists(/databases/$(database)/documents/classes/$(resource.data.class_id)/students/$(request.auth.uid)));
+
+      allow create: if isAuthenticated()
+        && request.resource.data.keys().hasAll([
+          'exam_id', 'class_id', 'start_time', 'end_time',
+          'is_random_order', 'max_attempts', 'created_at'
+        ])
+        && isClassCreator(request.resource.data.class_id)
+        && isExamCreator(request.resource.data.exam_id);
+
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // RESULTS
+    match /results/{resultId} {
+      allow read: if isOwner(resource.data.student_id)
+        || isClassCreator(
+            get(/databases/$(database)/documents/assignments/$(resource.data.assignment_id)).data.class_id
+          )
+        || isExamCreator(
+            get(/databases/$(database)/documents/assignments/$(resource.data.assignment_id)).data.exam_id
+          );
+
+      allow create: if isAuthenticated()
+        && isOwner(request.resource.data.student_id)
+        && exists(/databases/$(database)/documents/classes/$(get(
+            /databases/$(database)/documents/assignments/$(request.resource.data.assignment_id)
+          ).data.class_id)/students/$(request.auth.uid))
+        && request.resource.data.keys().hasAll([
+          'assignment_id', 'student_id', 'submission_time', 'score',
+          'answers', 'attempt_number', 'exam_title', 'student_name', 'time_up'
+        ]);
+
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

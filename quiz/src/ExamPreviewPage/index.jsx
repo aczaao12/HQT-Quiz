@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Button, Card, Form, Alert, ListGroup } from 'react-bootstrap';
+
 import { useUser } from '../context/UserContext';
 import { db } from '../../firebase';
 import { collection, doc, getDoc, getDocs, query } from 'firebase/firestore';
@@ -49,75 +49,87 @@ const ExamPreviewPage = () => {
   };
 
   if (loading || examLoading) {
-    return <Container className="text-center mt-5"><p>Loading exam preview...</p></Container>;
+    return <div className="max-w-lg mx-auto mt-5 p-4 text-center"><p>Loading exam preview...</p></div>;
   }
 
   if (!user) {
-    return <Container className="text-center mt-5"><p>Please log in to preview this exam.</p></Container>;
+    return <div className="max-w-lg mx-auto mt-5 p-4 text-center"><p>Please log in to preview this exam.</p></div>;
   }
 
   if (error) {
-    return <Container className="text-center mt-5"><Alert variant="danger">{error}</Alert></Container>;
+    return <div className="max-w-lg mx-auto mt-5 p-4 text-center"><div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">{error}</div></div>;
   }
 
   return (
-    <Container className="mt-5">
+    <div className="w-full mt-5 p-4">
       <h2 className="text-center mb-4">Exam Preview: {exam?.title}</h2>
       <p className="text-center">Duration: {exam?.duration} minutes | Total Points: {exam?.total_points}</p>
 
-      <Button variant="secondary" onClick={() => navigate('/exams')} className="mb-4">Back to My Created Exams</Button>
+      <button onClick={() => navigate('/exams')} className="mb-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">Back to My Created Exams</button>
 
       {questions.length === 0 ? (
-        <Alert variant="info">No questions found for this exam.</Alert>
+        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative" role="alert">No questions found for this exam.</div>
       ) : (
-        <ListGroup className="mb-4">
+        <ul className="mb-4 space-y-4">
           {questions.map((question, qIndex) => (
-            <ListGroup.Item key={question.id} className="mb-3 shadow-sm">
-              <Card.Title className="mb-3">
+            <li key={question.id} className="mb-3 p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
+              <h3 className="text-lg font-semibold mb-3">
                 Q{qIndex + 1}: {question.text} ({question.points} points)
-              </Card.Title>
+              </h3>
               {question.type === 'multiple_choice' && (
-                <Form.Group>
-                  <Form.Label>Options:</Form.Label>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">Options:</label>
                   {question.options.map((option, oIndex) => (
-                    <Form.Check
-                      key={oIndex}
-                      type="radio"
-                      id={`question-${question.id}-option-${oIndex}`}
-                      name={`question-${question.id}`}
-                      label={option}
-                      checked={question.correct_answer === option}
-                      readOnly
-                      disabled // Disable interactions for preview
-                    />
+                    <div key={oIndex} className="flex items-center mb-2">
+                      <input
+                        type="radio"
+                        id={`question-${question.id}-option-${oIndex}`}
+                        name={`question-${question.id}`}
+                        className="form-radio h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+                        checked={question.correct_answer === option}
+                        readOnly
+                        disabled // Disable interactions for preview
+                      />
+                      <label htmlFor={`question-${question.id}-option-${oIndex}`} className="ml-2 text-gray-700">{option}</label>
+                    </div>
                   ))}
-                  <Alert variant="success" className="mt-2">
+                  <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mt-2" role="alert">
                     Correct Answer: <strong>{question.correct_answer}</strong>
-                  </Alert>
-                </Form.Group>
+                  </div>
+                </div>
               )}
               {(question.type === 'essay' || question.type === 'fill_in') && (
-                <Form.Group>
-                  <Form.Label>Type: {question.type.replace('_', ' ')}</Form.Label>
-                  <Form.Control
-                    as={question.type === 'essay' ? 'textarea' : 'input'}
-                    rows={question.type === 'essay' ? 3 : 1}
-                    readOnly
-                    placeholder="This is a preview mode. No input is allowed."
-                    disabled
-                  />
-                  {question.correct_answer && ( // Display correct answer if provided for essay/fill-in
-                    <Alert variant="success" className="mt-2">
-                      Model Answer: <strong>{question.correct_answer}</strong>
-                    </Alert>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">Type: {question.type.replace('_', ' ')}</label>
+                  {question.type === 'essay' ? (
+                    <textarea
+                      rows={3}
+                      readOnly
+                      placeholder="This is a preview mode. No input is allowed."
+                      disabled
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm resize-y"
+                    ></textarea>
+                  ) : (
+                    <input
+                      type="text"
+                      readOnly
+                      placeholder="This is a preview mode. No input is allowed."
+                      disabled
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
                   )}
-                </Form.Group>
+                  {question.correct_answer && ( // Display correct answer if provided for essay/fill-in
+                    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mt-2" role="alert">
+                      Model Answer: <strong>{question.correct_answer}</strong>
+                    </div>
+                  )}
+                </div>
               )}
-            </ListGroup.Item>
+            </li>
           ))}
-        </ListGroup>
+        </ul>
       )}
-    </Container>
+    </div>
   );
 };
 

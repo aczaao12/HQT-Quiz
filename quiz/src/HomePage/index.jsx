@@ -1,13 +1,12 @@
 import React from 'react';
-import { Container, Button } from 'react-bootstrap';
 import { auth } from '../../firebase';
 import { signOut } from 'firebase/auth';
-import { useNavigate, Link } from 'react-router-dom'; // Import Link
-import { useUser } from '../context/UserContext'; // Import useUser hook
+import { useNavigate, Link } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { user, userData, loading } = useUser(); // Get user data from context
+  const { user, userData, loading } = useUser();
 
   const handleSignOut = async () => {
     try {
@@ -20,41 +19,47 @@ const HomePage = () => {
 
   if (loading) {
     return (
-      <Container className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
+      <div className="flex flex-col items-center justify-center min-h-screen">
         <p>Loading user data...</p>
-      </Container>
+      </div>
     );
   }
 
   return (
-    <Container className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
+    <div className="flex flex-col items-center justify-center min-h-screen">
       {user && userData ? (
         <>
-          <h1>Welcome, {userData.name}!</h1>
-          <p>You are logged in (Role: {userData.role}).</p>
-          <p>Email: {userData.email}</p>
-          <>
-            <Link to="/classes" className="btn btn-info mt-3 me-2">
+          <h1 className="text-3xl font-bold mb-4">Welcome, {userData.name}!</h1>
+          <p className="text-lg mb-2">You are logged in (Role: {userData.role}).</p>
+          <p className="text-lg mb-4">Email: {userData.email}</p>
+          <div className="flex space-x-4">
+            <Link to="/classes" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
               My Classes
             </Link>
-            <Link to="/exams" className="btn btn-warning mt-3">
+            <Link to="/exams" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
               My Exams
             </Link>
-          </>
-          <Button variant="danger" onClick={handleSignOut} className="mt-3">
+          </div>
+          <button
+            onClick={handleSignOut}
+            className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+          >
             Sign Out
-          </Button>
+          </button>
         </>
       ) : (
         <>
-          <h1>Welcome to the Home Page!</h1>
-          <p>You are logged in.</p>
-          <Button variant="danger" onClick={handleSignOut}>
+          <h1 className="text-3xl font-bold mb-4">Welcome to the Home Page!</h1>
+          <p className="text-lg mb-4">You are logged in.</p>
+          <button
+            onClick={handleSignOut}
+            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+          >
             Sign Out
-          </Button>
+          </button>
         </>
       )}
-    </Container>
+    </div>
   );
 };
 

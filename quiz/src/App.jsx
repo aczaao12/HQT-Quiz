@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useUser } from './context/UserContext';
 import LoginPage from './LoginPage';
 import HomePage from './HomePage';
@@ -14,22 +14,22 @@ import './App.css';
 
 function App() {
   const { user, loading } = useUser(); // userData is not needed for top-level route guarding now
+  const location = useLocation();
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+      <div className="flex items-center justify-center min-h-screen">
         <p>Loading...</p>
       </div>
     );
   }
 
   return (
-    <BrowserRouter>
       <Routes>
         <Route path="/login" element={user ? <Navigate to="/home" /> : <LoginPage />} />
         <Route
           path="/home"
-          element={user ? <HomePage /> : <Navigate to="/login" />}
+          element={user ? <HomePage /> : <Navigate to="/login" state={{ from: location }} />}
         />
         {/* All routes below now only check for user authentication, not roles */}
         <Route
@@ -38,7 +38,7 @@ function App() {
             user ? (
               <ClassesPage />
             ) : (
-              <Navigate to="/login" />
+              <Navigate to="/login" state={{ from: location }} />
             )
           }
         />
@@ -48,7 +48,7 @@ function App() {
             user ? (
               <ExamManagementPage />
             ) : (
-              <Navigate to="/login" />
+              <Navigate to="/login" state={{ from: location }} />
             )
           }
         />
@@ -58,7 +58,7 @@ function App() {
             user ? (
               <QuestionManagementPage />
             ) : (
-              <Navigate to="/login" />
+              <Navigate to="/login" state={{ from: location }} />
             )
           }
         />
@@ -68,7 +68,7 @@ function App() {
             user ? (
               <AssignmentPage />
             ) : (
-              <Navigate to="/login" />
+              <Navigate to="/login" state={{ from: location }} />
             )
           }
         />
@@ -78,7 +78,7 @@ function App() {
             user ? (
               <AssignmentsPage />
             ) : (
-              <Navigate to="/login" />
+              <Navigate to="/login" state={{ from: location }} />
             )
           }
         />
@@ -88,7 +88,7 @@ function App() {
             user ? (
               <TakeExamPage />
             ) : (
-              <Navigate to="/login" />
+              <Navigate to="/login" state={{ from: location }} />
             )
           }
         />
@@ -99,13 +99,12 @@ function App() {
             user ? (
               <ExamPreviewPage />
             ) : (
-              <Navigate to="/login" />
+              <Navigate to="/login" state={{ from: location }} />
             )
           }
         />
-        <Route path="*" element={<Navigate to={user ? "/home" : "/login"} />} />
+        <Route path="*" element={<Navigate to={user ? "/home" : "/login"} state={{ from: location }} />} />
       </Routes>
-    </BrowserRouter>
   );
 }
 
