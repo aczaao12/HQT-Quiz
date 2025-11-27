@@ -134,7 +134,7 @@ const AssignmentPage = () => {
         created_at: serverTimestamp(),
       });
       setSuccess(`Exam "${exam?.title}" assigned to class successfully!`);
-      const generatedLink = `${window.location.origin}/take-exam/${docRef.id}`;
+      const generatedLink = `${window.location.origin}/assignments/${docRef.id}/take`;
       setShareableLink(generatedLink);
       // Reset form or navigate
       setStartTime('');

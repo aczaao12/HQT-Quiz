@@ -99,10 +99,7 @@ service cloud.firestore {
 
     // ASSIGNMENTS
     match /assignments/{assignmentId} {
-      allow read: if isClassCreator(resource.data.class_id)
-        || isExamCreator(resource.data.exam_id)
-        || (isAuthenticated() &&
-            exists(/databases/$(database)/documents/classes/$(resource.data.class_id)/students/$(request.auth.uid)));
+      allow read: if isAuthenticated();
 
       allow create: if isAuthenticated()
         && request.resource.data.keys().hasAll([
@@ -118,23 +115,16 @@ service cloud.firestore {
 
     // RESULTS
     match /results/{resultId} {
-      allow read: if isOwner(resource.data.student_id)
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.student_id
         || isClassCreator(
             get(/databases/$(database)/documents/assignments/$(resource.data.assignment_id)).data.class_id
           )
         || isExamCreator(
             get(/databases/$(database)/documents/assignments/$(resource.data.assignment_id)).data.exam_id
-          );
+          ));
 
-      allow create: if isAuthenticated()
-        && isOwner(request.resource.data.student_id)
-        && exists(/databases/$(database)/documents/classes/$(get(
-            /databases/$(database)/documents/assignments/$(request.resource.data.assignment_id)
-          ).data.class_id)/students/$(request.auth.uid))
-        && request.resource.data.keys().hasAll([
-          'assignment_id', 'student_id', 'submission_time', 'score',
-          'answers', 'attempt_number', 'exam_title', 'student_name', 'time_up'
-        ]);
+      allow create: if isAuthenticated() && isOwner(request.resource.data.student_id);
 
       allow update: if false;
       allow delete: if false;

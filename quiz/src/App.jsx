@@ -10,6 +10,7 @@ import AssignmentPage from './AssignmentPage';
 import AssignmentsPage from './AssignmentsPage';
 import TakeExamPage from './TakeExamPage';
 import ExamPreviewPage from './ExamPreviewPage'; // Import ExamPreviewPage
+import ResultPage from './ResultPage'; // Import ResultPage
 import './App.css';
 
 function App() {
@@ -98,6 +99,17 @@ function App() {
           element={
             user ? (
               <ExamPreviewPage />
+            ) : (
+              <Navigate to="/login" state={{ from: location }} />
+            )
+          }
+        />
+        {/* Protected route for Exam Results - Any authenticated user */}
+        <Route
+          path="/results/:resultId"
+          element={
+            user ? (
+              <ResultPage />
             ) : (
               <Navigate to="/login" state={{ from: location }} />
             )
