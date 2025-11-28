@@ -68,6 +68,7 @@ export const useExamSubmission = (user, userData, assignmentId, assignment, exam
                 total_duration_minutes: exam?.duration,
                 time_remaining_seconds: timeLeft,
                 exam_id: exam?.id,
+                questions: questions, // Snapshot of questions
             };
             console.log("Attempting to add result data:", resultData);
 

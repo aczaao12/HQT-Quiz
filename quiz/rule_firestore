@@ -40,16 +40,11 @@ service cloud.firestore {
 
     // CLASSES
     match /classes/{classId} {
-      allow read: if isAuthenticated() && (
-        request.auth.uid == resource.data.teacher_id ||
-        exists(/databases/$(database)/documents/classes/$(classId)/students/$(request.auth.uid))
-      );
+      allow read: if isAuthenticated();
 
       allow create: if isAuthenticated()
-        && request.resource.data.keys().hasAll([
-          'name', 'teacher_id', 'organization_id', 'join_code', 'created_at'
-        ])
-        && request.resource.data.teacher_id == request.auth.uid;
+        && request.resource.data.teacher_id == request.auth.uid
+        && request.resource.data.keys().hasAll(['name', 'teacher_id', 'created_at']);
 
       allow update: if isClassCreator(classId)
         && request.resource.data.diff(resource.data).affectedKeys().hasAny(['name', 'join_code']);
