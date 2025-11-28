@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
 import { useAssignmentAndExamDetails } from './useAssignmentAndExamDetails';
 import { useExamTimer } from './useExamTimer';
@@ -11,17 +11,30 @@ import { useExamSubmission } from './useExamSubmission';
  */
 export const useTakeExam = (assignmentId, navigate) => {
     const { user, userData, loading: userLoading } = useUser();
-    
+
     // Current question index for navigation
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
-    const { assignment, exam, questions, examLoading } = useAssignmentAndExamDetails(
-        user, 
-        assignmentId, 
-        setError 
+    // Lifted state for error, success, and loading
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(null);
+    const [examLoading, setExamLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
+
+    const { assignment, exam, questions } = useAssignmentAndExamDetails(
+        user,
+        assignmentId,
+        setError,
+        setExamLoading
     );
 
-    const { answers, submitting, handleAnswerChange, handleSubmitExam, error, success, setError, setSuccess } = useExamSubmission(
+    const { timeLeft, setTimeLeft } = useExamTimer(
+        exam?.duration * 60, // initialTime
+        examLoading,
+        submitting
+    );
+
+    const { answers, handleAnswerChange, handleSubmitExam } = useExamSubmission(
         user,
         userData,
         assignmentId,
@@ -31,16 +44,17 @@ export const useTakeExam = (assignmentId, navigate) => {
         navigate,
         timeLeft,
         setError,
-        setSuccess
+        setSuccess,
+        submitting,
+        setSubmitting
     );
 
-    const { timeLeft, setTimeLeft } = useExamTimer(
-        exam?.duration * 60, // initialTime
-        examLoading, 
-        submitting, 
-        handleSubmitExam 
-    );
-
+    // Auto-submit when time runs out
+    useEffect(() => {
+        if (timeLeft === 0 && !examLoading && !submitting && !success) {
+            handleSubmitExam(true);
+        }
+    }, [timeLeft, examLoading, submitting, handleSubmitExam, success]);
 
     // =========================================================
     // 4. MEMOIZED VALUES (Derived State)
@@ -79,6 +93,13 @@ export const useTakeExam = (assignmentId, navigate) => {
     }, [questions, answers]);
 
 
+    // Status derived state
+    const status = useMemo(() => {
+        if (examLoading) return 'loading';
+        if (error) return 'error';
+        return 'ready';
+    }, [examLoading, error]);
+
     // =========================================================
     // 5. RETURN VALUES
     // =========================================================
@@ -89,20 +110,22 @@ export const useTakeExam = (assignmentId, navigate) => {
         exam,
         questions,
         answers,
-        
+
         // State
         error,
         success,
-        examLoading: userLoading || examLoading, // Combine user loading with exam loading
+        examLoading,
+        userLoading, // Return raw userLoading
+        status,      // Return derived status
         submitting,
         timeLeft,
         currentQuestionIndex,
-        
+
         // Handlers
         handleAnswerChange,
         handleSubmitExam,
         setCurrentQuestionIndex,
-        
+
         // Derived values
         formatTime,
         progressPercent,

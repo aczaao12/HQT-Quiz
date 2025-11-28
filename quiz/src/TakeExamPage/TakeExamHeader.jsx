@@ -1,67 +1,172 @@
 import React from 'react';
 
-// This component uses values returned from useExamLogic hook
-const TakeExamHeader = ({ 
-    exam, 
-    timeLeft, 
-    formatTime, 
-    answeredCount, 
-    totalQuestions, 
-    progressPercent, 
-    timerColor, 
-    submitting, 
-    assignment, 
+const TakeExamHeader = ({
+    exam,
+    timeLeft,
+    formatTime,
+    answeredCount,
+    questionsLength,
+    progressPercent,
+    timerColor,
+    submitting,
+    assignment,
     navigate,
-    handleSubmitExam // Thêm handler vào props
+    handleSubmitExam
 }) => {
-    return (
-        <header className="fixed top-0 left-0 right-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md shadow-xl z-50 p-4 border-b border-indigo-200 dark:border-gray-700">
-            <div className="max-w-7xl mx-auto flex justify-between items-center h-14">
-                
-                {/* Timer (Tonal/Prominent) */}
-                <div className="flex flex-col items-start text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 p-2 rounded-xl border border-indigo-100 dark:border-indigo-900/50 shadow-inner">
-                    <p className="text-xs font-medium uppercase tracking-wider text-indigo-500 dark:text-indigo-500">Time Left</p>
-                    <p className={`text-3xl font-extrabold transition-colors duration-500 ${timeLeft <= 60 ? 'text-red-600 dark:text-red-400 animate-pulse' : 'text-indigo-700 dark:text-indigo-400'}`}>
-                        {formatTime(timeLeft)}
-                    </p>
-                </div>
+    const isLowTime = timeLeft <= 60;
+    const progress = (answeredCount / questionsLength) * 100;
 
-                {/* Exam Info / Progress (Clean/Centered) */}
-                <div className="flex-grow mx-4 md:mx-12 text-center">
-                    <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white truncate">
-                        {exam?.title || 'Online Examination'}
-                    </h1>
-                    <div className="mt-1 flex items-center justify-center space-x-4">
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                            Completed: {answeredCount}/{totalQuestions}
+    return (
+        <header className="sticky top-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-lg z-50 border-b border-gray-200/50 dark:border-gray-700/50">
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-1.5 sm:py-4">
+                {/* Mobile Layout - Horizontal & Compact */}
+                <div className="flex md:hidden items-center justify-between gap-2">
+                    {/* Timer - Compact */}
+                    <div className="flex items-center gap-2 px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+                        <svg className="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className={`text-sm font-black ${isLowTime
+                            ? 'text-rose-600 dark:text-rose-400 animate-pulse'
+                            : 'text-indigo-700 dark:text-indigo-300'
+                            }`}>
+                            {formatTime(timeLeft)}
                         </span>
-                        {/* Progress Bar (Sleeker) */}
-                        <div className="w-40 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
-                            <div
-                                className={`h-2.5 rounded-full transition-all duration-1000 ease-in-out ${timerColor}`}
-                                style={{ width: progressPercent + '%' }}
-                            ></div>
+                    </div>
+
+                    {/* Progress - Compact */}
+                    <div className="flex-1 flex items-center gap-2 min-w-0">
+                        <div className="flex items-center gap-1 px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg flex-shrink-0">
+                            <svg className="w-3 h-3 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+                                {answeredCount}/{questionsLength}
+                            </span>
                         </div>
+                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden min-w-0">
+                            <div
+                                className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-500 ease-out rounded-full"
+                                style={{ width: `${progressPercent}%` }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Actions - Compact */}
+                    <div className="flex items-center gap-1.5">
+                        <button
+                            onClick={() => assignment && navigate(`/home`)}
+                            className="p-1.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg transition-all duration-200 border border-gray-200 dark:border-gray-700"
+                            disabled={submitting}
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={() => handleSubmitExam()}
+                            className="px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold rounded-lg transition-all duration-200 shadow-lg shadow-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                            disabled={submitting || questionsLength === 0}
+                        >
+                            {submitting ? '...' : 'Submit'}
+                        </button>
                     </div>
                 </div>
 
-                {/* Actions (Elevated Buttons) */}
-                <div className="flex space-x-3">
-                    <button
-                        onClick={() => assignment && navigate(`/classes/${assignment.class_id}/assignments`)}
-                        className="flex items-center bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold py-2 px-4 rounded-xl transition duration-300 shadow-md text-sm border border-gray-300 dark:border-gray-600"
-                        disabled={submitting}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                        Back
-                    </button>
-                    <button
-                        onClick={() => handleSubmitExam()}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-xl transition duration-300 shadow-lg shadow-indigo-500/50 text-sm disabled:bg-indigo-400"
-                        disabled={submitting || totalQuestions === 0}
-                    >
-                        {submitting ? 'Submitting...' : 'Submit Exam'}
-                    </button>
+                {/* Desktop/Tablet Layout - Original */}
+                <div className="hidden md:flex items-center justify-between gap-4">
+                    {/* Timer with Circular Progress */}
+                    <div className="relative flex-shrink-0">
+                        <svg className="w-20 h-20 lg:w-24 lg:h-24 transform -rotate-90" viewBox="0 0 100 100">
+                            <circle
+                                cx="50"
+                                cy="50"
+                                r="42"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="8"
+                                className="text-gray-200 dark:text-gray-700"
+                            />
+                            <circle
+                                cx="50"
+                                cy="50"
+                                r="42"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="8"
+                                strokeDasharray={`${2 * Math.PI * 42}`}
+                                strokeDashoffset={`${2 * Math.PI * 42 * (1 - progress / 100)}`}
+                                strokeLinecap="round"
+                                className={`transition-all duration-500 ${isLowTime
+                                    ? 'text-rose-500 dark:text-rose-400'
+                                    : 'text-indigo-500 dark:text-indigo-400'
+                                    }`}
+                            />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Time</span>
+                            <span className={`text-lg lg:text-xl font-black transition-all duration-300 ${isLowTime
+                                ? 'text-rose-600 dark:text-rose-400 animate-pulse'
+                                : 'text-indigo-700 dark:text-indigo-300'
+                                }`}>
+                                {formatTime(timeLeft)}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Exam Info */}
+                    <div className="flex-1 text-left min-w-0">
+                        <h1 className="text-xl lg:text-2xl font-extrabold text-gray-900 dark:text-white truncate mb-2">
+                            {exam?.title || 'Online Examination'}
+                        </h1>
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 rounded-full">
+                                <svg className="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">
+                                    {answeredCount}/{questionsLength}
+                                </span>
+                            </div>
+                            <div className="w-32 lg:w-48 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                                <div
+                                    className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-500 ease-out rounded-full"
+                                    style={{ width: `${progressPercent}%` }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                        <button
+                            onClick={() => assignment && navigate(`/home`)}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 text-sm"
+                            disabled={submitting}
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Back
+                        </button>
+                        <button
+                            onClick={() => handleSubmitExam()}
+                            className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold rounded-xl transition-all duration-200 shadow-lg shadow-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/60 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none text-sm"
+                            disabled={submitting || questionsLength === 0}
+                        >
+                            {submitting ? (
+                                <span className="flex items-center gap-2">
+                                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                    </svg>
+                                    Submitting...
+                                </span>
+                            ) : (
+                                'Submit Exam'
+                            )}
+                        </button>
+                    </div>
                 </div>
             </div>
         </header>

@@ -2,9 +2,8 @@ import { useState, useCallback } from 'react';
 import { collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 
-export const useExamSubmission = (user, userData, assignmentId, assignment, exam, questions, navigate, timeLeft, setError, setSuccess) => {
+export const useExamSubmission = (user, userData, assignmentId, assignment, exam, questions, navigate, timeLeft, setError, setSuccess, submitting, setSubmitting) => {
     const [answers, setAnswers] = useState({}); // {questionId: answer}
-    const [submitting, setSubmitting] = useState(false);
 
     const handleAnswerChange = useCallback((questionId, value) => {
         setAnswers((prevAnswers) => ({
@@ -23,7 +22,7 @@ export const useExamSubmission = (user, userData, assignmentId, assignment, exam
         });
         return score;
     }, [questions, answers]);
-    
+
     const handleSubmitExam = useCallback(async (timeUp = false) => {
         console.log("handleSubmitExam called. timeUp:", timeUp);
         if (submitting) {
@@ -61,7 +60,7 @@ export const useExamSubmission = (user, userData, assignmentId, assignment, exam
                 student_id: user.uid,
                 submission_time: serverTimestamp(),
                 score: finalScore,
-                answers: answers, 
+                answers: answers,
                 attempt_number: attemptNumber,
                 exam_title: exam?.title,
                 student_name: userData?.name || user.email,
@@ -69,6 +68,7 @@ export const useExamSubmission = (user, userData, assignmentId, assignment, exam
                 total_duration_minutes: exam?.duration,
                 time_remaining_seconds: timeLeft,
                 exam_id: exam?.id,
+                questions: questions, // Snapshot of questions
             };
             console.log("Attempting to add result data:", resultData);
 
@@ -79,7 +79,7 @@ export const useExamSubmission = (user, userData, assignmentId, assignment, exam
             setTimeout(() => {
                 const navigateUrl = `/results/${resultRef.id}`;
                 console.log("Navigating to:", navigateUrl);
-                navigate(navigateUrl); 
+                navigate(navigateUrl);
             }, 2000);
 
         } catch (err) {
@@ -89,7 +89,7 @@ export const useExamSubmission = (user, userData, assignmentId, assignment, exam
             setSubmitting(false);
             console.log("Submission process finished.");
         }
-    }, [submitting, calculateScore, assignmentId, user, answers, assignment, exam, userData, navigate, timeLeft, setError, setSuccess]);
+    }, [submitting, calculateScore, assignmentId, user, answers, assignment, exam, userData, navigate, timeLeft, setError, setSuccess, setSubmitting]);
 
     return { answers, submitting, handleAnswerChange, handleSubmitExam, calculateScore };
 };
